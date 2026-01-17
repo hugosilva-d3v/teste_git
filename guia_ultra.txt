@@ -1,0 +1,46 @@
+#!/bin/bash
+
+echo "=== 1️⃣ Instalando Git ==="
+sudo apt update
+sudo apt install git -y
+
+echo "=== 2️⃣ Configurando usuário Git ==="
+read -p "Digite seu nome: " git_name
+read -p "Digite seu e-mail: " git_email
+git config --global user.name "$git_name"
+git config --global user.email "$git_email"
+
+echo "=== 3️⃣ Verificando chaves SSH existentes ==="
+if [ -f ~/.ssh/id_ed25519 ]; then
+    echo "Chave SSH já existe: ~/.ssh/id_ed25519"
+else
+    echo "=== 4️⃣ Gerando nova chave SSH ==="
+    ssh-keygen -t ed25519 -C "$git_email" -f ~/.ssh/id_ed25519
+fi
+
+echo "=== 5️⃣ Iniciando agente SSH e adicionando chave ==="
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+
+echo "=== 6️⃣ Exibindo chave pública (copie tudo) ==="
+cat ~/.ssh/id_ed25519.pub
+echo ""
+echo "Copie a chave acima e adicione no GitHub em Settings -> SSH and GPG keys -> New SSH key."
+echo "Título sugerido: 'Notebook Ubuntu'"
+
+read -p "Depois de adicionar a chave no GitHub, pressione ENTER para continuar..."
+
+echo "=== 7️⃣ Testando conexão SSH com GitHub ==="
+echo "Digite 'yes' se for perguntado sobre autenticidade do host"
+ssh -T git@github.com
+
+echo "=== 8️⃣ Clonar repositório via SSH (opcional) ==="
+read -p "Deseja clonar um repositório agora? (s/n): " resp
+if [[ "$resp" == "s" || "$resp" == "S" ]]; then
+    read -p "Digite a URL SSH do repositório (ex: git@github.com:Usuario/Repo.git): " repo_url
+    read -p "Digite o diretório de destino (ex: ~/projetos/meu-repo): " dir_dest
+    git clone "$repo_url" "$dir_dest"
+    echo "Repositório clonado em $dir_dest"
+fi
+
+echo "✅ Tudo pronto! Agora você pode usar Git + GitHub via SSH no Ubuntu sem digitar senha."
