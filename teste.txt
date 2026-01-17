@@ -1,1 +1,1 @@
-dia 1 - primeiro exemplo
+Dia 1 - Primeiro Exemplo do Hugo
